@@ -2,7 +2,7 @@ package bitwise.internal
 
 import scala.math.max
 
-abstract class Bit (val value: BigInt, val length: Int) {
+abstract class Bit(var value: BigInt, val length: Int) {
   type BitType <: Bit
 
   def apply(pos: Int): UBit = {
@@ -46,7 +46,24 @@ abstract class Bit (val value: BigInt, val length: Int) {
     do_head(n)
   }
 
-  def do_head(n: Int): UBit = do_apply(length - 1, length - n - 1)
+  private def do_head(n: Int): UBit = do_apply(length - 1, length - n - 1)
+
+  def update(pos: Int, value: Boolean): Unit = {
+    if(pos >= length || pos < 0)
+      throw new IndexOutOfBoundsException(s"pos[$pos] must be between 0 to ${length - 1}")
+
+    do_update(pos, value)
+  }
+
+  private def do_update(pos: Int, isSet: Boolean): Unit = {
+    val mask = BigInt(1) << pos
+
+    value =
+      if (isSet)
+        value | mask
+      else
+        value & ~mask
+  }
 
   def +(that: BitType): BitType
   def +&(that: BitType): BitType
