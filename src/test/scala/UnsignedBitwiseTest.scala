@@ -45,12 +45,20 @@ class UnsignedBitwiseTest extends FlatSpec with Matchers {
 
     an[IllegalArgumentException] should be thrownBy bit.head(-1)
     an[IllegalArgumentException] should be thrownBy bit.head(5)
+
+    an[IllegalArgumentException] should be thrownBy "0b0101".toUBit.toBool
   }
 
   it should "raise NumberFormatException" in {
     an[NumberFormatException] should be thrownBy "0o9ab".toUBit
     an[NumberFormatException] should be thrownBy "".toUBit
     an[NumberFormatException] should be thrownBy "0x".toUBit
+  }
+
+  it should "raise IndexOutofBoundsException" in {
+    val v = "0b0001".toUBit
+    an[IndexOutOfBoundsException] should be thrownBy (v(10) = true)
+    an[IndexOutOfBoundsException] should be thrownBy (v(-1) = true)
   }
 
   it should "get appropriate operation result" in {
@@ -109,5 +117,22 @@ class UnsignedBitwiseTest extends FlatSpec with Matchers {
     assert(0.toUBit.pad(3).toString == "000")
     assert("0xF".toUBit.pad(5).toString == "01111")
     assert("0xFFFF".toUBit.pad(8).toString == "11111111")
+  }
+
+  it should "appropriate update value" in {
+    val v = "0b1010".toUBit
+    v(3) = true
+    assert(v == "0b1010".toUBit)
+    v(2) = true
+    assert(v == "0b1110".toUBit)
+    v(3) = false
+    assert(v == "0b0110".toUBit)
+    v(0) = false
+    assert(v == "0b0110".toUBit)
+  }
+
+  it should "appropriate List created" in {
+    assert("0b0101".toUBit.toBools == Seq(false, true, false, true))
+    assert("0b1111".toUBit.toBools == Seq(true, true, true, true))
   }
 }

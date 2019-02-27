@@ -74,6 +74,21 @@ abstract class Bit(var value: BigInt, val length: Int) {
   def <=(that: BitType): Boolean = this.value <= that.value
   def >(that: BitType): Boolean = this.value > that.value
   def >=(that: BitType): Boolean = this.value >= that.value
+
+  def toBool(): Boolean = {
+    require(length == 1, s"length[$length] must be 1")
+    value == 1
+  }
+
+  def toBools(): Seq[Boolean] = {
+    var v = value
+
+    (0 until length).map{ _ =>
+      val tmp = v
+      v = v >> 1
+      (tmp & 1) == 1
+    }.reverse
+  }
 }
 
 object UBit {
