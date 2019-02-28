@@ -81,13 +81,7 @@ abstract class Bit(var value: BigInt, val length: Int) {
   }
 
   def toBools(): Seq[Boolean] = {
-    var v = value
-
-    (0 until length).map{ _ =>
-      val tmp = v
-      v = v >> 1
-      (tmp & 1) == 1
-    }.reverse
+    (0 until length).map{ x => ((value >> x) & 1) == 1 }.reverse
   }
 }
 
