@@ -27,12 +27,12 @@ abstract class Bit(var value: BigInt, val length: Int) {
     UBit(shifted & range, length)
   }
 
-  def pad[T <: Bit](length: Int)(implicit cbf: BitBuilder[T]): T = {
+  def pad[T <: BitType](length: Int)(implicit cbf: BitBuilder[T]): T = {
     require(length > 0, s"length[$length] must be positive")
     do_pad(length)
   }
 
-  protected def do_pad[T <: Bit](length: Int)(implicit cbf: BitBuilder[T]): T
+  protected def do_pad[T <: BitType](length: Int)(implicit cbf: BitBuilder[T]): T
 
   def tail(n: Int): UBit = {
     require(n < length && n >= 0, s"n[$n] must be between 0 to ${length - 1}")
@@ -65,24 +65,24 @@ abstract class Bit(var value: BigInt, val length: Int) {
         value & ~mask
   }
 
-  def +[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)((x, y) => max(x, y))(_ + _)
-  def +&[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)((x, y) => max(x, y) + 1)(_ + _)
-  def -[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)((x, y) => max(x, y))(_ - _)
-  def -&[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)((x, y) => max(x, y) + 1)(_ - _)
+  def +[T <: BitType](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)(max(_, _))(_ + _)
+  def +&[T <: BitType](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)(max(_, _) + 1)(_ + _)
+  def -[T <: BitType](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)(max(_, _))(_ - _)
+  def -&[T <: BitType](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)(max(_, _) + 1)(_ - _)
 
-  private def do_calc[T <: Bit](that: T)(decideLength: (Int, Int) => Int)(op: (BigInt, BigInt) => BigInt)(implicit cbf: BitBuilder[T]): T = {
+  protected def do_calc[T <: BitType](that: T)(decideLength: (Int, Int) => Int)(op: (BigInt, BigInt) => BigInt)(implicit cbf: BitBuilder[T]): T = {
     val length = decideLength(this.length, that.length)
     val mask = (BigInt(1) << length) - 1
-    val value = (this.value + that.value) & mask
+    val value = op(this.value, that.value) & mask
     cbf(value, length)
   }
 
-  def ==[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value == that.value
-  def !=[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value != that.value
-  def <[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value < that.value
-  def <=[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value <= that.value
-  def >[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value > that.value
-  def >=[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value >= that.value
+  def ==[T <: BitType](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value == that.value
+  def !=[T <: BitType](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value != that.value
+  def <[T <: BitType](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value < that.value
+  def <=[T <: BitType](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value <= that.value
+  def >[T <: BitType](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value > that.value
+  def >=[T <: BitType](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value >= that.value
 
   def toBool(): Boolean = {
     require(length == 1, s"length[$length] must be 1")
@@ -116,7 +116,7 @@ object UBit {
 class UBit private(value: BigInt, length: Int) extends Bit(value, length) {
   type BitType = UBit
 
-  protected def do_pad[T <: Bit](length: Int)(implicit cbf: BitBuilder[T]): T = {
+  protected def do_pad[T <: BitType](length: Int)(implicit cbf: BitBuilder[T]): T = {
     if (length >= this.length)
       cbf(value, length)
     else {
@@ -132,21 +132,7 @@ class UBit private(value: BigInt, length: Int) extends Bit(value, length) {
     pad + raw
   }
 
-  def &(that: BitType): BitType = {
-    val length = max(this.length, that.length)
-
-    new UBit(this.value & that.value, length)
-  }
-
-  def |(that: BitType): BitType = {
-    val length = max(this.length, that.length)
-
-    new UBit(this.value | that.value, length)
-  }
-
-  def ^(that: BitType): BitType = {
-    val length = max(this.length, that.length)
-
-    new UBit(this.value ^ that.value, length)
-  }
+  def &[T <: BitType](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)(max(_, _))(_ & _)
+  def |[T <: BitType](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)(max(_, _))(_ | _)
+  def ^[T <: BitType](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)(max(_, _))(_ ^ _)
 }
