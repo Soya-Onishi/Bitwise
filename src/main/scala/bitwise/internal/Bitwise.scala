@@ -19,7 +19,7 @@ abstract class Bit(var value: BigInt, val length: Int) {
     do_apply(to, from)
   }
 
-  def do_apply(to: Int, from: Int): UBit = {
+  protected def do_apply(to: Int, from: Int): UBit = {
     val length = to - from + 1
     val range = (1 << length) - 1
     val shifted = value >> from
@@ -32,14 +32,14 @@ abstract class Bit(var value: BigInt, val length: Int) {
     do_pad(length)
   }
 
-  def do_pad(length: Int): BitType
+  protected def do_pad(length: Int): BitType
 
   def tail(n: Int): UBit = {
     require(n < length && n >= 0, s"n[$n] must be between 0 to ${length - 1}")
     do_tail(n)
   }
 
-  def do_tail(n: Int): UBit = do_apply(length - n - 1, 0)
+  protected def do_tail(n: Int): UBit = do_apply(length - n - 1, 0)
 
   def head(n: Int): UBit = {
     require(n <= length && n > 0, s"n[$n] must be between 1 to $length")
@@ -55,7 +55,7 @@ abstract class Bit(var value: BigInt, val length: Int) {
     do_update(pos, value)
   }
 
-  private def do_update(pos: Int, isSet: Boolean): Unit = {
+  protected def do_update(pos: Int, isSet: Boolean): Unit = {
     val mask = BigInt(1) << pos
 
     value =
