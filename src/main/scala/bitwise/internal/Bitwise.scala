@@ -27,12 +27,12 @@ abstract class Bit(var value: BigInt, val length: Int) {
     UBit(shifted & range, length)
   }
 
-  def pad(length: Int): BitType = {
+  def pad[T <: Bit](length: Int)(implicit cbf: BitBuilder[T]): T = {
     require(length > 0, s"length[$length] must be positive")
     do_pad(length)
   }
 
-  protected def do_pad(length: Int): BitType
+  protected def do_pad[T <: Bit](length: Int)(implicit cbf: BitBuilder[T]): T
 
   def tail(n: Int): UBit = {
     require(n < length && n >= 0, s"n[$n] must be between 0 to ${length - 1}")
@@ -65,15 +65,24 @@ abstract class Bit(var value: BigInt, val length: Int) {
         value & ~mask
   }
 
-  def +(that: BitType): BitType
-  def +&(that: BitType): BitType
+  def +[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)((x, y) => max(x, y))(_ + _)
+  def +&[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)((x, y) => max(x, y) + 1)(_ + _)
+  def -[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)((x, y) => max(x, y))(_ - _)
+  def -&[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)((x, y) => max(x, y) + 1)(_ - _)
 
-  def ==(that: BitType): Boolean = this.value == that.value
-  def !=(that: BitType): Boolean = this.value != that.value
-  def <(that: BitType): Boolean = this.value < that.value
-  def <=(that: BitType): Boolean = this.value <= that.value
-  def >(that: BitType): Boolean = this.value > that.value
-  def >=(that: BitType): Boolean = this.value >= that.value
+  private def do_calc[T <: Bit](that: T)(decideLength: (Int, Int) => Int)(op: (BigInt, BigInt) => BigInt)(implicit cbf: BitBuilder[T]): T = {
+    val length = decideLength(this.length, that.length)
+    val mask = (BigInt(1) << length) - 1
+    val value = (this.value + that.value) & mask
+    cbf(value, length)
+  }
+
+  def ==[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value == that.value
+  def !=[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value != that.value
+  def <[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value < that.value
+  def <=[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value <= that.value
+  def >[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value > that.value
+  def >=[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): Boolean = this.value >= that.value
 
   def toBool(): Boolean = {
     require(length == 1, s"length[$length] must be 1")
@@ -107,11 +116,13 @@ object UBit {
 class UBit private(value: BigInt, length: Int) extends Bit(value, length) {
   type BitType = UBit
 
-  def do_pad(length: Int): BitType = {
+  protected def do_pad[T <: Bit](length: Int)(implicit cbf: BitBuilder[T]): T = {
     if (length >= this.length)
-      new UBit(value, length)
-    else
-      apply(length - 1, 0)
+      cbf(value, length)
+    else {
+      val v = apply(length - 1, 0)
+      cbf(v.value, v.length)
+    }
   }
 
   override def toString: String = {
@@ -119,18 +130,6 @@ class UBit private(value: BigInt, length: Int) extends Bit(value, length) {
     val pad = "0" * (length - raw.length)
 
     pad + raw
-  }
-
-  override def +(that: BitType): BitType = {
-    val sum = this +& that
-    sum.tail(1)
-  }
-
-  override def +&(that: BitType): BitType = {
-    val length = max(this.length, that.length)
-    val sum = this.value + that.value
-
-    new UBit(sum, length + 1)
   }
 
   def &(that: BitType): BitType = {
