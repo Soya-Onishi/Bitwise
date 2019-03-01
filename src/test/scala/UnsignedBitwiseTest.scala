@@ -37,9 +37,6 @@ class UnsignedBitwiseTest extends FlatSpec with Matchers {
     an[IllegalArgumentException] should be thrownBy bit(4)
     an[IllegalArgumentException] should be thrownBy bit(-1)
 
-    // an[IllegalArgumentException] should be thrownBy bit.pad(-1)
-    // an[IllegalArgumentException] should be thrownBy bit.pad(0)
-
     an[IllegalArgumentException] should be thrownBy bit.tail(-1)
     an[IllegalArgumentException] should be thrownBy bit.tail(5)
 
@@ -59,12 +56,20 @@ class UnsignedBitwiseTest extends FlatSpec with Matchers {
     val v = "0b0001".toUBit
     an[IndexOutOfBoundsException] should be thrownBy (v(10) = true)
     an[IndexOutOfBoundsException] should be thrownBy (v(-1) = true)
+
+    val bit = 10.toUBit(4)
+    an[IndexOutOfBoundsException] should be thrownBy bit.setLength(-1)
+    an[IndexOutOfBoundsException] should be thrownBy bit.setLength(0)
   }
 
   it should "get appropriate operation result" in {
     assert(1.toUBit + 2.toUBit == 3.toUBit)
     assert((1.toUBit + 2.toUBit).length == 2)
     assert((1.toUBit +& 2.toUBit).length == 3)
+
+    assert((3.toUBit - 2.toUBit) == 1.toUBit)
+    assert((3.toUBit - 2.toUBit).length == 2)
+    assert((3.toUBit -& 2.toUBit).length == 3)
 
     assert(("0xFFFF".toUBit & 1.toUBit) == 1.toUBit)
     assert(("0xFFFF".toUBit & "0x0F0F".toUBit) == "0x0F0F".toUBit)
@@ -114,9 +119,9 @@ class UnsignedBitwiseTest extends FlatSpec with Matchers {
   }
 
   it should "get appropriate padding" in {
-    // assert(0.toUBit.pad(3).toString == "000")
-    // assert("0xF".toUBit.pad(5).toString == "01111")
-    // assert("0xFFFF".toUBit.pad(8).toString == "11111111")
+    assert(0.toUBit.setLength(3).toString == "000")
+    assert("0xF".toUBit.setLength(5).toString == "01111")
+    assert("0xFFFF".toUBit.setLength(8).toString == "11111111")
   }
 
   it should "appropriate update value" in {
@@ -134,5 +139,11 @@ class UnsignedBitwiseTest extends FlatSpec with Matchers {
   it should "appropriate List created" in {
     assert("0b0101".toUBit.toBools == Seq(false, true, false, true))
     assert("0b1111".toUBit.toBools == Seq(true, true, true, true))
+  }
+
+  it should "appropriate catted binary" in {
+    assert(("0b0101".toUBit ++ "0b0011".toUBit) == "0b01010011".toUBit)
+    assert(("0b01".toUBit ++ "0b1100".toUBit) == "0b011100".toUBit)
+    assert(("0b1101".toUBit ++ "0b00".toUBit) == "0b110100".toUBit)
   }
 }
