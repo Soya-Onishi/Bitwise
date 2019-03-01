@@ -1,4 +1,3 @@
-import bitwise.internal._
 import scala.language.implicitConversions
 
 package object bitwise {
@@ -8,6 +7,4 @@ package object bitwise {
   implicit val ubitCalculateUBit = new BitBuilder[UBit] {
     def apply(value: BigInt, length: Int): UBit = UBit(value, length)
   }
-
-  type UBit = bitwise.internal.UBit
 }

@@ -1,4 +1,4 @@
-package bitwise.internal
+package bitwise
 
 class FromIntToBit(val from: BigInt) {
   def toUBit(): UBit = UBit(from)
