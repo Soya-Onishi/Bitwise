@@ -27,14 +27,14 @@ abstract class Bit(var value: BigInt, val length: Int) {
     UBit(shifted & range, length)
   }
 
-  def setLength(length: Int)(implicit bb: BitBuilder[BitType]): BitType = {
-    if (length <= 0 || length >= length)
+  def setLength(length: Int): BitType = {
+    if (length <= 0)
       throw new IndexOutOfBoundsException(s"length[$length] must be between 1 to ${length - 1}")
 
     do_setLength(length)
   }
 
-  protected def do_setLength(length: Int)(implicit bb: BitBuilder[BitType]): BitType
+  protected def do_setLength(length: Int): BitType
 
   def tail(n: Int): UBit = {
     require(n < length && n >= 0, s"n[$n] must be between 0 to ${length - 1}")
@@ -131,13 +131,11 @@ object UBit {
 class UBit private(value: BigInt, length: Int) extends Bit(value, length) {
   type BitType = UBit
 
-  protected def do_setLength(length: Int)(implicit cbf: BitBuilder[BitType]): BitType = {
+  protected def do_setLength(length: Int): BitType = {
     if (length >= this.length)
-      cbf(value, length)
-    else {
-      val v = apply(length - 1, 0)
-      cbf(v.value, v.length)
-    }
+      new UBit(value, length)
+    else
+      apply(length - 1, 0)
   }
 
 
