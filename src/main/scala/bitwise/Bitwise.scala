@@ -81,16 +81,16 @@ abstract class Bit(var value: BigInt, val length: Int) {
     bf(value, length)
   }
 
-  def +(that: BitType)(implicit bb: BitBuilder[BitType]): BitType = do_calc(that)(max(_, _))(_ + _)
+  def +(that: BitType)(implicit bb: BitBuilder[BitType]): BitType = do_calc(that)(max)(_ + _)
   def +&(that: BitType)(implicit bb: BitBuilder[BitType]): BitType = do_calc(that)(max(_, _) + 1)(_ + _)
 
-  def -(that: BitType)(implicit bb: BitBuilder[BitType]): BitType = do_calc(that)(max(_, _))(_ - _)
+  def -(that: BitType)(implicit bb: BitBuilder[BitType]): BitType = do_calc(that)(max)(_ - _)
   def -&(that: BitType)(implicit bb: BitBuilder[BitType]): BitType = do_calc(that)(max(_, _) + 1)(_ - _)
 
-  def *(that: BitType)(implicit bb: BitBuilder[BitType]): BitType = do_calc(that)(max(_, _))(_ * _)
+  def *(that: BitType)(implicit bb: BitBuilder[BitType]): BitType = do_calc(that)(max)(_ * _)
   def *&(that: BitType)(implicit bb: BitBuilder[BitType]): BitType = do_calc(that)(_ + _)(_ * _)
 
-  def /(that: BitType)(implicit bb: BitBuilder[BitType]): BitType = do_calc(that)(max(_, _))(_ / _)
+  def /(that: BitType)(implicit bb: BitBuilder[BitType]): BitType = do_calc(that)(max)(_ / _)
 
 
   protected abstract def compare(x: BigInt, y: BigInt): BigInt
