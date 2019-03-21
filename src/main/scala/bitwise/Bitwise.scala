@@ -109,6 +109,17 @@ abstract class Bit(var value: BigInt, val length: Int) {
   def toBools: Seq[Boolean] = {
     (0 until length).map{ x => ((value >> x) & 1) == 1 }
   }
+
+  def toUBit(): UBit = UBit(this.value, this.length)
+  def toUBit(length: Int): UBit = {
+    if(length >= this.length)
+      UBit(value, length)
+    else {
+      val mask = (1 << length) - 1
+      val newValue = value & mask
+      UBit(newValue, length)
+    }
+  }
 }
 
 object UBit {
@@ -132,14 +143,6 @@ object UBit {
 
 class UBit private(value: BigInt, length: Int) extends Bit(value, length) {
   type BitType = UBit
-
-  protected def do_setLength(length: Int): BitType = {
-    if (length >= this.length)
-      new UBit(value, length)
-    else
-      apply(length - 1, 0)
-  }
-
 
   override def toString: String = {
     val raw = value.toString(2)
