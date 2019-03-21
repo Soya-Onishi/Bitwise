@@ -137,7 +137,7 @@ class UnsignedBitwiseTest extends FlatSpec with Matchers {
   }
 
   it should "appropriate List created" in {
-    assert("0b0101".toUBit.toBools == Seq(false, true, false, true))
+    assert("0b0101".toUBit.toBools == Seq(true, false, true, false))
     assert("0b1111".toUBit.toBools == Seq(true, true, true, true))
   }
 

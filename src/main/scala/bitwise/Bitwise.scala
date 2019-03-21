@@ -101,13 +101,13 @@ abstract class Bit(var value: BigInt, val length: Int) {
   def >(that: BitType): Boolean = compare(this.value, that.value) > 0
   def >=(that: BitType): Boolean = compare(this.value, that.value) >= 0
 
-  def toBool(): Boolean = {
+  def toBool: Boolean = {
     require(length == 1, s"length[$length] must be 1")
     value == 1
   }
 
-  def toBools(): Seq[Boolean] = {
-    (0 until length).map{ x => ((value >> x) & 1) == 1 }.reverse
+  def toBools: Seq[Boolean] = {
+    (0 until length).map{ x => ((value >> x) & 1) == 1 }
   }
 }
 
