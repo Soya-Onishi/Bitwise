@@ -146,7 +146,28 @@ class UBit private(value: BigInt, length: Int) extends Bit(value, length) {
     pad + raw
   }
 
-  def &[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)(max(_, _))(_ & _)
-  def |[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)(max(_, _))(_ | _)
-  def ^[T <: Bit](that: T)(implicit cbf: BitBuilder[T]): T = do_calc(that)(max(_, _))(_ ^ _)
+  protected def compare(x: BigInt, y: BigInt): BigInt = x - y
+
+  def &(that: BitType): BitType = do_calc(that)(max(_, _))(_ & _)
+  def |(that: BitType): BitType = do_calc(that)(max(_, _))(_ | _)
+  def ^(that: BitType): BitType = do_calc(that)(max(_, _))(_ ^ _)
+}
+
+class SBit(value: BigInt, length: Int) extends Bit(value, length) {
+  type BitType = SBit
+
+  protected def do_setLength(length: Int): BitType = {
+    if(length >= this.length) {
+      if(this.head(1).toBool)
+        new SBit(-value & ((BigInt(1) << length) - 1), length)
+      else
+        new SBit(value, length)
+    } else {
+      new SBit(value & ((BigInt(1) << length) - 1), length)
+    }
+  }
+
+  protected def compare(x: BigInt, y: BigInt): BigInt = {
+
+  }
 }
