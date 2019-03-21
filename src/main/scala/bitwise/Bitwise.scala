@@ -92,12 +92,14 @@ abstract class Bit(var value: BigInt, val length: Int) {
 
   def /(that: BitType)(implicit bb: BitBuilder[BitType]): BitType = do_calc(that)(max(_, _))(_ / _)
 
-  def ==(that: BitType): Boolean = this.value == that.value
-  def !=(that: BitType): Boolean = this.value != that.value
-  def <(that: BitType): Boolean = this.value < that.value
-  def <=(that: BitType): Boolean = this.value <= that.value
-  def >(that: BitType): Boolean = this.value > that.value
-  def >=(that: BitType): Boolean = this.value >= that.value
+
+  protected abstract def compare(x: BigInt, y: BigInt): BigInt
+  def ==(that: BitType): Boolean = compare(this.value, that.value) == 0
+  def !=(that: BitType): Boolean = compare(this.value, that.value) != 0
+  def <(that: BitType): Boolean = compare(this.value, that.value) < 0
+  def <=(that: BitType): Boolean = compare(this.value, that.value) <= 0
+  def >(that: BitType): Boolean = compare(this.value, that.value) > 0
+  def >=(that: BitType): Boolean = compare(this.value, that.value) >= 0
 
   def toBool(): Boolean = {
     require(length == 1, s"length[$length] must be 1")
