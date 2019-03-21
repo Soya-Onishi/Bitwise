@@ -8,7 +8,7 @@ abstract class Bit(var value: BigInt, val length: Int) {
   def apply(pos: Int): UBit = {
     require(pos >= 0 && pos < length, s"pos[$pos] must be between 0 to ${length - 1}")
 
-    do_apply(pos, pos)
+    truncate(pos, pos)
   }
 
   def apply(to: Int, from: Int): UBit = {
@@ -16,10 +16,10 @@ abstract class Bit(var value: BigInt, val length: Int) {
     require(from >= 0, s"to[$to] and from[$from] must be positive or zero")
     require(to < length, s"to[$to] and from[$from] must be less than length[$length]")
 
-    do_apply(to, from)
+    truncate(to, from)
   }
 
-  protected def do_apply(to: Int, from: Int): UBit = {
+  private def truncate(to: Int, from: Int): UBit = {
     val length = to - from + 1
     val range = (1 << length) - 1
     val shifted = value >> from
@@ -27,41 +27,24 @@ abstract class Bit(var value: BigInt, val length: Int) {
     UBit(shifted & range, length)
   }
 
-  def setLength(length: Int): BitType = {
-    if (length <= 0)
-      throw new IndexOutOfBoundsException(s"length[$length] must be between 1 to ${length - 1}")
-
-    do_setLength(length)
-  }
-
-  protected def do_setLength(length: Int): BitType
-
   def tail(n: Int): UBit = {
     require(n < length && n >= 0, s"n[$n] must be between 0 to ${length - 1}")
-    do_tail(n)
+    truncate(length - n - 1, 0)
   }
-
-  protected def do_tail(n: Int): UBit = do_apply(length - n - 1, 0)
 
   def head(n: Int): UBit = {
     require(n <= length && n > 0, s"n[$n] must be between 1 to $length")
-    do_head(n)
+    truncate(length - 1, length - n - 1)
   }
 
-  protected def do_head(n: Int): UBit = do_apply(length - 1, length - n - 1)
-
-  def update(pos: Int, value: Boolean): Unit = {
+  def update(pos: Int, isAssert: Boolean): Unit = {
     if(pos >= length || pos < 0)
       throw new IndexOutOfBoundsException(s"pos[$pos] must be between 0 to ${length - 1}")
 
-    do_update(pos, value)
-  }
-
-  protected def do_update(pos: Int, isSet: Boolean): Unit = {
     val mask = BigInt(1) << pos
 
     value =
-      if (isSet)
+      if (isAssert)
         value | mask
       else
         value & ~mask
@@ -153,9 +136,9 @@ class UBit private(value: BigInt, length: Int) extends Bit(value, length) {
 
   protected def compare(x: BigInt, y: BigInt): BigInt = x - y
 
-  def &(that: BitType): BitType = do_calc(that)(max(_, _))(_ & _)
-  def |(that: BitType): BitType = do_calc(that)(max(_, _))(_ | _)
-  def ^(that: BitType): BitType = do_calc(that)(max(_, _))(_ ^ _)
+  def &(that: BitType): BitType = do_calc(that)(max)(_ & _)
+  def |(that: BitType): BitType = do_calc(that)(max)(_ | _)
+  def ^(that: BitType): BitType = do_calc(that)(max)(_ ^ _)
 }
 
 //class SBit(value: BigInt, length: Int) extends Bit(value, length) {
