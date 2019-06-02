@@ -2,6 +2,130 @@ package bitwise.internal
 
 import scala.math.max
 
+class Bit(val value: BigInt, val length: Int) {
+  def apply(pos: Int): Bit = {
+    require(pos >= 0 && pos < length, s"pos[$pos] must be between 0 to ${length - 1}")
+
+    this.apply(pos, pos)
+  }
+
+  def apply(to: Int, from: Int): Bit = {
+    require(to >= from, s"to[$to] must be greater or equal than from[$from]")
+    require(from >= 0, s"to[$to] and from[$from] must be positive or zero")
+    require(to < length, s"to[$to] and from[$from] must be less than length[$length]")
+
+    val trancatedValue = this.value & ((1 << (to + 1)) - 1) >> from
+    val newLength = to - from + 1
+
+    new Bit(trancatedValue, newLength)
+  }
+
+  def +(that: Bit): Bit = {
+    val newLength = max(this.length, that.length)
+    val newValue = (this.value + that.value) & ((1 << newLength) - 1)
+
+    new Bit(newValue, newLength)
+  }
+
+  def -(that: Bit): Bit = {
+    val newValue = this.value + that.value
+    val newLength = max(this.length, that.length)
+
+    new Bit(newValue, newLength)
+  }
+
+  def tail(n: Int): Bit = {
+    require(n < length && n >= 0, s"n[$n] must be between 0 to ${length - 1}")
+
+    this.apply(length - n - 1, 0)
+  }
+
+  def head(n: Int): Bit = {
+    require(n <= length && n > 0, s"n[$n] must be between 1 to $length")
+
+    this.apply(length - 1, length - n)
+  }
+
+  def zeroExt(n: Int): Bit = {
+    require(n > length, s"n[$n] must be larger than lenght[$length]")
+
+    new Bit(this.value, n)
+  }
+
+  def signExt(n: Int): Bit = {
+    require(n > length, s"n[$n] must be larger than lenght[$length]")
+
+    val extender =
+      if(((BigInt(1) << (length - 1)) & value) > 0)
+        0
+      else {
+        ((1 << n) - 1) ^ ((1 << length) - 1)
+      }
+
+    new Bit(value | extender, n)
+  }
+
+  def ==(that: Bit): Boolean = {
+    this.value == that.value
+  }
+
+  def !=(that: Bit): Boolean = {
+    this.value != that.value
+  }
+
+  def >(that: Bit): Boolean = {
+    this.value > that.value
+  }
+
+  def >=(that: Bit): Boolean = {
+    this.value >= that.value
+  }
+
+  def <(that: Bit): Boolean = {
+    this.value < that.value
+  }
+
+  def <=(that: Bit): Boolean = {
+    this.value <= that.value
+  }
+
+  def ==&(that: Bit): Boolean = {
+    (this.value == that.value) && (this.length == that.length)
+  }
+
+  def !=&(that: Bit): Boolean = {
+    (this.value != that.value) || (this.length != that.length)
+  }
+
+  def msb: Boolean = {
+    (value & (1 << (length - 1))) > 0
+  }
+
+  def lsb: Boolean = {
+    (value & 1) > 0
+  }
+
+  def toULong: Long = value.toLong
+  def toSLong: Long = {
+    if (length > 64) {
+      (value & -1L).toLong
+    } else {
+      if (this.msb) {
+        val mask = -1L ^ ((1 << length) - 1).toLong
+        (value | mask).toLong
+      } else {
+        value.toLong
+      }
+    }
+
+  }
+
+  def toUInt: Int = value.toInt
+  def toSInt: Int = this.toSLong.toInt
+  def toUShort: Short = value.toShort
+  def toSShort: Short = this.toSLong.toShort
+}
+/*
 abstract class Bit(var value: BigInt, val length: Int) {
   type BitType <: Bit
 
@@ -151,3 +275,4 @@ class UBit private(value: BigInt, length: Int) extends Bit(value, length) {
     new UBit(this.value ^ that.value, length)
   }
 }
+*/
