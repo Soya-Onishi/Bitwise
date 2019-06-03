@@ -1,8 +1,8 @@
-package bitwise.internal
+package bitwise
 
 class FromIntToBit(val from: BigInt) {
-  def toUBit(): UBit = UBit(from)
-  def toUBit(width: Int): UBit = UBit(from, width)
+  def toBit(): Bit = Bit(from)
+  def toBit(width: Int): Bit = Bit(from, width)
 }
 
 class FromStringToBit(v: String) {
@@ -26,6 +26,6 @@ class FromStringToBit(v: String) {
     }
   }
 
-  def toUBit(): UBit = UBit(value, length)
-  def toUBit(width: Int): UBit = UBit(value, width)
+  def toBit(): Bit = Bit(value, length)
+  def toBit(width: Int): Bit = Bit(value, width)
 }
