@@ -1,6 +1,41 @@
-package bitwise.internal
+package bitwise
 
 import scala.math.max
+
+object Bit {
+  private def measureLength(value: BigInt): Int = {
+    def countLeastLength(value: BigInt, first: Boolean = true): Int = {
+      if(value == 0)
+        if(first) { 1 } else { 0 }
+      else
+        1 + countLeastLength(value >> 1, first=false)
+    }
+
+    val absValue =
+      if(value < 0)
+        -value
+      else
+        value
+
+    if(value < 0)
+      countLeastLength(absValue) + 1
+    else
+      countLeastLength(absValue)
+  }
+
+  def apply(value: BigInt): Bit = {
+    apply(value, measureLength(value))
+  }
+
+  def apply(value: BigInt, width: Int): Bit = {
+    require(width > 0, s"width[$width] must be greater than 0")
+
+    val leastWidth = measureLength(value)
+    require(width >= leastWidth, s"value[$value]'s width[$width] must be at least $leastWidth")
+
+    new Bit(value, width)
+  }
+}
 
 class Bit(val value: BigInt, val length: Int) {
   def apply(pos: Int): Bit = {
@@ -126,8 +161,8 @@ class Bit(val value: BigInt, val length: Int) {
   def toSShort: Short = this.toSLong.toShort
 }
 /*
-abstract class Bit(var value: BigInt, val length: Int) {
-  type BitType <: Bit
+abstract class bitwise.Bit(var value: BigInt, val length: Int) {
+  type BitType <: bitwise.Bit
 
   def apply(pos: Int): UBit = {
     require(pos >= 0 && pos < length, s"pos[$pos] must be between 0 to ${length - 1}")
@@ -228,7 +263,7 @@ object UBit {
   }
 }
 
-class UBit private(value: BigInt, length: Int) extends Bit(value, length) {
+class UBit private(value: BigInt, length: Int) extends bitwise.Bit(value, length) {
   type BitType = UBit
 
   def do_pad(length: Int): BitType = {
