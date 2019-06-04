@@ -49,10 +49,10 @@ class Bit(val value: BigInt, val length: Int) {
     require(from >= 0, s"to[$to] and from[$from] must be positive or zero")
     require(to < length, s"to[$to] and from[$from] must be less than length[$length]")
 
-    val trancatedValue = this.value & ((1 << (to + 1)) - 1) >> from
+    val truncatedValue = (this.value & ((1 << (to + 1)) - 1)) >> from
     val newLength = to - from + 1
 
-    new Bit(trancatedValue, newLength)
+    new Bit(truncatedValue, newLength)
   }
 
   def +(that: Bit): Bit = {
@@ -69,14 +69,14 @@ class Bit(val value: BigInt, val length: Int) {
     new Bit(newValue, newLength)
   }
 
-  def tail(n: Int): Bit = {
-    require(n < length && n >= 0, s"n[$n] must be between 0 to ${length - 1}")
+  def lsb(n: Int): Bit = {
+    require(n <= length && n > 0, s"n[$n] must be between 1 to ${length - 1}")
 
-    this.apply(length - n - 1, 0)
+    this.apply(n - 1, 0)
   }
 
-  def head(n: Int): Bit = {
-    require(n <= length && n > 0, s"n[$n] must be between 1 to $length")
+  def msb(n: Int): Bit = {
+    require(n <= length && n > 0, s"n[$n] must be between 1 and ${length - 1}")
 
     this.apply(length - 1, length - n)
   }
@@ -132,20 +132,12 @@ class Bit(val value: BigInt, val length: Int) {
     (this.value != that.value) || (this.length != that.length)
   }
 
-  def msb: Boolean = {
-    (value & (1 << (length - 1))) > 0
-  }
-
-  def lsb: Boolean = {
-    (value & 1) > 0
-  }
-
   def toULong: Long = value.toLong
   def toSLong: Long = {
     if (length > 64) {
       (value & -1L).toLong
     } else {
-      if (this.msb) {
+      if (this.msb(1) == 1.toBit()) {
         val mask = -1L ^ ((1 << length) - 1).toLong
         (value | mask).toLong
       } else {
@@ -159,6 +151,8 @@ class Bit(val value: BigInt, val length: Int) {
   def toSInt: Int = this.toSLong.toInt
   def toUShort: Short = value.toShort
   def toSShort: Short = this.toSLong.toShort
+
+  override def toString: String = s"$value<$length>"
 }
 /*
 abstract class bitwise.Bit(var value: BigInt, val length: Int) {
