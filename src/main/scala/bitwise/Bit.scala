@@ -91,10 +91,10 @@ class Bit(val value: BigInt, val length: Int) {
     require(n > length, s"n[$n] must be larger than lenght[$length]")
 
     val extender =
-      if(((BigInt(1) << (length - 1)) & value) > 0)
-        0
+      if(msb(1) == 1.toBit())
+        ((BigInt(1) << n) - 1) ^ ((BigInt(1) << length) - 1)
       else {
-        ((1 << n) - 1) ^ ((1 << length) - 1)
+        BigInt(0)
       }
 
     new Bit(value | extender, n)
