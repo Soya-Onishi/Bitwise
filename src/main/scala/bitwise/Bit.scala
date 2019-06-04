@@ -132,25 +132,43 @@ class Bit(val value: BigInt, val length: Int) {
     (this.value != that.value) || (this.length != that.length)
   }
 
-  def toULong: Long = value.toLong
-  def toSLong: Long = {
-    if (length > 64) {
-      (value & -1L).toLong
-    } else {
-      if (this.msb(1) == 1.toBit()) {
-        val mask = -1L ^ ((1 << length) - 1).toLong
-        (value | mask).toLong
-      } else {
-        value.toLong
-      }
-    }
+  def toULong: Long = {
+    require(length < 64, s"bit length[$length] should be less than 64")
 
+    val mask = (BigInt(1) << length) - 1
+    (value & mask).toLong
   }
 
-  def toUInt: Int = value.toInt
-  def toSInt: Int = this.toSLong.toInt
-  def toUShort: Short = value.toShort
-  def toSShort: Short = this.toSLong.toShort
+  def toSLong: Long = {
+    require(length <= 64, s"bit length[$length] should be less than or equal 64")
+
+    if (this.msb(1) == 1.toBit()) {
+      val mask = -1L ^ ((1L << length) - 1)
+      (value | mask).toLong
+    } else {
+      value.toLong
+    }
+  }
+
+  def toUInt: Int = {
+    require(length < 32, s"bit length[$length] should be less than 32")
+    this.toULong.toInt
+  }
+
+  def toSInt: Int = {
+    require(length <= 32, s"bit length[$length] should be less than or equal 32")
+    this.toSLong.toInt
+  }
+
+  def toUShort: Short = {
+    require(length < 16, s"bit length[$length] should be less than 16")
+    this.toULong.toShort
+  }
+
+  def toSShort: Short = {
+    require(length <= 16, s"bit length[$length] should be less than or equal 16")
+    this.toSLong.toShort
+  }
 
   override def toString: String = s"$value<$length>"
 }
