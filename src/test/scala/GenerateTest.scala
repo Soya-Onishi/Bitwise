@@ -20,5 +20,7 @@ class GenerateTest extends FlatSpec with Matchers {
     an[IllegalArgumentException] should be thrownBy { 2.toBit(1) }
     an[IllegalArgumentException] should be thrownBy { (-1).toBit(1) }
     an[IllegalArgumentException] should be thrownBy { (-1).toBit(0) }
+    an[IllegalArgumentException] should be thrownBy { 1.toBit(-1) }
+    an[IllegalArgumentException] should be thrownBy { (-1).toBit(-1) }
   }
 }
