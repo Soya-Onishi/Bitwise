@@ -1,7 +1,5 @@
 package bitwise
 
-import scala.math.max
-
 object Bit {
   private def measureLength(value: BigInt): Int = {
     def countLeastLength(value: BigInt, first: Boolean = true): Int = {
@@ -37,7 +35,7 @@ object Bit {
   }
 }
 
-class Bit(val value: BigInt, val length: Int) {
+class Bit(val value: BigInt, val length: Int) extends Ordering[Bit] {
   def apply(pos: Int): Bit = {
     require(pos >= 0 && pos < length, s"pos[$pos] must be between 0 to ${length - 1}")
 
@@ -56,7 +54,7 @@ class Bit(val value: BigInt, val length: Int) {
   }
 
   def +(that: Bit): Bit = {
-    val newLength = max(this.length, that.length)
+    val newLength = scala.math.max(this.length, that.length)
     val newValue = (this.value + that.value) & ((1 << newLength) - 1)
 
     new Bit(newValue, newLength)
@@ -64,7 +62,7 @@ class Bit(val value: BigInt, val length: Int) {
 
   def -(that: Bit): Bit = {
     val newValue = this.value + that.value
-    val newLength = max(this.length, that.length)
+    val newLength = scala.math.max(this.length, that.length)
 
     new Bit(newValue, newLength)
   }
@@ -82,13 +80,13 @@ class Bit(val value: BigInt, val length: Int) {
   }
 
   def zeroExt(n: Int): Bit = {
-    require(n > length, s"n[$n] must be larger than lenght[$length]")
+    require(n > length, s"n[$n] must be larger than length[$length]")
 
     new Bit(this.value, n)
   }
 
   def signExt(n: Int): Bit = {
-    require(n > length, s"n[$n] must be larger than lenght[$length]")
+    require(n > length, s"n[$n] must be larger than length[$length]")
 
     val extender =
       if(msb(1) == 1.toBit())
@@ -108,20 +106,8 @@ class Bit(val value: BigInt, val length: Int) {
     this.value != that.value
   }
 
-  def >(that: Bit): Boolean = {
-    this.value > that.value
-  }
-
-  def >=(that: Bit): Boolean = {
-    this.value >= that.value
-  }
-
-  def <(that: Bit): Boolean = {
-    this.value < that.value
-  }
-
-  def <=(that: Bit): Boolean = {
-    this.value <= that.value
+  override def compare(x: Bit, y: Bit): Int = {
+    x.value.toInt - x.value.toInt
   }
 
   def ==&(that: Bit): Boolean = {
