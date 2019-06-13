@@ -35,7 +35,7 @@ object Bit {
   }
 }
 
-class Bit(val value: BigInt, val length: Int) extends Ordering[Bit] {
+class Bit(val value: BigInt, val length: Int) extends Ordered[Bit] {
   def apply(pos: Int): Bit = {
     require(pos >= 0 && pos < length, s"pos[$pos] must be between 0 to ${length - 1}")
 
@@ -106,8 +106,10 @@ class Bit(val value: BigInt, val length: Int) extends Ordering[Bit] {
     this.value != that.value
   }
 
-  override def compare(x: Bit, y: Bit): Int = {
-    x.value.toInt - x.value.toInt
+  override def compare(that: Bit): Int = {
+    if(this.value > that.value) 1
+    else if (this.value == that.value) 0
+    else -1
   }
 
   def ==&(that: Bit): Boolean = {
