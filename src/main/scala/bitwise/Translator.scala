@@ -16,13 +16,11 @@ class FromStringToBit(v: String) {
       else
         ""
 
-    s.slice(0, 2) match {
+    head match {
       case "0b" => (BigInt(body, 2), body.length)
       case "0o" => (BigInt(body, 8), body.length * 3)
       case "0x" => (BigInt(body, 16), body.length * 4)
-      case _ =>
-        val v = BigInt(s)
-        (v, v.bitLength)
+      case _    => throw new IllegalArgumentException("""head of string must be "0x", "0o" or "0b"""")
     }
   }
 
