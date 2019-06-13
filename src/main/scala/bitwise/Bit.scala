@@ -53,16 +53,14 @@ class Bit(val value: BigInt, val length: Int) extends Ordered[Bit] {
     new Bit(truncatedValue, newLength)
   }
 
-  def +(that: Bit): Bit = {
-    val newLength = scala.math.max(this.length, that.length)
-    val newValue = (this.value + that.value) & ((1 << newLength) - 1)
+  def +(that: Bit): Bit = arithmetic(this, that, _ + _)
+  def -(that: Bit): Bit = arithmetic(this, that, _ - _)
+  def *(that: Bit): Bit = arithmetic(this, that, _ * _)
+  def /(that: Bit): Bit = arithmetic(this, that, _ / _)
 
-    new Bit(newValue, newLength)
-  }
-
-  def -(that: Bit): Bit = {
-    val newValue = this.value + that.value
-    val newLength = scala.math.max(this.length, that.length)
+  private def arithmetic(x: Bit, y: Bit, op: (BigInt, BigInt) => BigInt): Bit = {
+    val newLength = scala.math.max(x.length, y.length)
+    val newValue = op(x.value, y.value) & ((1 << newLength) - 1)
 
     new Bit(newValue, newLength)
   }
