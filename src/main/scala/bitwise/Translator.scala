@@ -1,6 +1,6 @@
 package bitwise
 
-class FromIntToBit(val from: BigInt) {
+class FromIntegerToBit(val from: BigInt) {
   def toBit(): Bit = Bit(from)
   def toBit(width: Int): Bit = Bit(from, width)
 }
