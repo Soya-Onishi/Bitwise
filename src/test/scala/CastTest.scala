@@ -48,4 +48,46 @@ class CastTest extends FlatSpec with Matchers {
     an[IllegalArgumentException] should be thrownBy{ 10.toBit(17).toSShort }
     an[IllegalArgumentException] should be thrownBy{ (-1).toBit(17).toSShort }
   }
+
+  "Long.toBit" should "be success" in {
+    val r = new scala.util.Random(1)
+
+    for (_ <- 0 to 1000) {
+      val length = 1 + r.nextInt(62)
+      val value: Long = 1L << (length - 1L)
+
+      val b = value.toBit(length)
+
+      assert(b.length == length)
+      assert(b.value == value)
+    }
+  }
+
+  "Int.toBit" should "be success" in {
+    val r = new scala.util.Random(1)
+
+    for (_ <- 0 to 1000) {
+      val length = 1 + r.nextInt(30)
+      val value: Int = 1 << (length - 1)
+
+      val b = value.toBit(length)
+
+      assert(b.length == length)
+      assert(b.value == value)
+    }
+  }
+
+  "Boolean.toBit" should "be success" in {
+    val r = new scala.util.Random(1)
+
+    for(_ <- 0 to 1000) {
+      val length = r.nextInt(Integer.MAX_VALUE)
+      val value = r.nextInt(2) == 1
+
+      val b = value.toBit(length)
+
+      assert(b.length == length)
+      assert(b.value == (if(value) 1 else 0))
+    }
+  }
 }
