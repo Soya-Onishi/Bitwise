@@ -8,8 +8,8 @@ class CatTest extends FlatSpec with Matchers {
     val r1 = new scala.util.Random(1)
 
     for (_ <- 0 to 1000) {
-      val aLen = 1 + r1.nextInt(31)
-      val bLen = 1 + r1.nextInt(31)
+      val aLen = 1 + r1.nextInt(30)
+      val bLen = 1 + r1.nextInt(30)
       val a = r1.nextInt(getMax(aLen))
       val b = r1.nextInt(getMax(bLen))
 
