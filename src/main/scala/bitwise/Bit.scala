@@ -96,6 +96,13 @@ class Bit(val value: BigInt, val length: Int) extends Ordered[Bit] {
     new Bit(value | extender, n)
   }
 
+  def ++(that: Bit): Bit = {
+    val newLength = this.length + that.length
+    val newValue = (this.value << that.length) | that.value
+
+    new Bit(newValue, newLength)
+  }
+
   def ==(that: Bit): Boolean = {
     this.value == that.value
   }
